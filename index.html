@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#173b32">
+	<title>Inventario de radios</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--ink: #1c2925;
+			--muted: #68756f;
+			--green: #173b32;
+			--green-soft: #e4eee9;
+			--lime: #d9f16a;
+			--paper: #f3f5ef;
+			--line: #dce2dc;
+			--white: #fff;
+			--red: #a43f32;
+			--shadow: 0 12px 32px rgb(25 48 39 / 7%);
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			min-width: 320px;
+			color: var(--ink);
+			background-color: var(--paper);
+			background-image: linear-gradient(90deg, rgb(23 59 50 / 2%) 1px, transparent 1px),
+				linear-gradient(rgb(23 59 50 / 2%) 1px, transparent 1px);
+			background-size: 24px 24px;
+			font-family: "Segoe UI", Tahoma, sans-serif;
+			font-size: 14px;
+		}
+
+		button, input, select { font: inherit; }
+
+		.topbar {
+			min-height: 72px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 24px;
+			padding: 0 5vw;
+			color: var(--white);
+			background: var(--green);
+		}
+
+		.brand {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			font-size: 15px;
+			font-weight: 700;
+			letter-spacing: .04em;
+		}
+
+		.brand-mark {
+			width: 34px;
+			height: 34px;
+			display: grid;
+			place-items: center;
+			color: var(--green);
+			background: var(--lime);
+			border-radius: 8px;
+			font-family: Georgia, serif;
+			font-size: 20px;
+			font-weight: 700;
+		}
+
+		.topbar-meta { color: #c1d0ca; font-size: 12px; }
+
+		main {
+			width: min(1440px, 100%);
+			margin: 0 auto;
+			padding: 34px 5vw 56px;
+		}
+
+		.page-heading {
+			display: flex;
+			align-items: end;
+			justify-content: space-between;
+			gap: 20px;
+			margin-bottom: 24px;
+		}
+
+		.eyebrow {
+			margin: 0 0 8px;
+			color: #536c60;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: .12em;
+			text-transform: uppercase;
+		}
+
+		h1 {
+			margin: 0;
+			font-family: Georgia, "Times New Roman", serif;
+			font-size: clamp(28px, 3vw, 38px);
+			font-weight: 500;
+		}
+
+		.page-note { margin: 8px 0 0; color: var(--muted); }
+
+		.count-badge {
+			display: flex;
+			align-items: center;
+			gap: 9px;
+			padding: 10px 13px;
+			color: var(--green);
+			background: var(--lime);
+			border-radius: 6px;
+			font-weight: 700;
+			white-space: nowrap;
+		}
+
+		.workspace {
+			display: grid;
+			grid-template-columns: minmax(300px, 370px) minmax(0, 1fr);
+			align-items: start;
+			gap: 22px;
+		}
+
+		.panel {
+			overflow: hidden;
+			background: var(--white);
+			border: 1px solid var(--line);
+			border-radius: 7px;
+			box-shadow: var(--shadow);
+		}
+
+		.panel-heading {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			min-height: 62px;
+			padding: 15px 20px;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.panel-heading h2 {
+			margin: 0;
+			font-family: Georgia, "Times New Roman", serif;
+			font-size: 19px;
+			font-weight: 500;
+		}
+
+		.panel-kicker {
+			color: var(--muted);
+			font-size: 11px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: .08em;
+		}
+
+		form { padding: 18px 20px 20px; }
+
+		.generated-id {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 16px;
+			padding: 11px 12px;
+			background: #f2f6ed;
+			border-left: 3px solid #a1bd43;
+			color: #4d5e52;
+			font-size: 12px;
+		}
+
+		.generated-id strong { color: var(--green); font-size: 13px; }
+
+		.form-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 13px 12px;
+		}
+
+		.field { min-width: 0; }
+		.field-wide { grid-column: 1 / -1; }
+
+		label {
+			display: block;
+			margin-bottom: 6px;
+			color: #3d4b45;
+			font-size: 12px;
+			font-weight: 650;
+		}
+
+		.optional { color: #87918b; font-weight: 400; }
+
+		input, select {
+			width: 100%;
+			height: 40px;
+			padding: 0 11px;
+			color: var(--ink);
+			background-color: var(--white);
+			border: 1px solid #cfd8d1;
+			border-radius: 4px;
+			outline: none;
+		}
+
+		input::placeholder { color: #9aa49e; }
+		input:focus, select:focus { border-color: #4a806a; box-shadow: 0 0 0 3px rgb(74 128 106 / 14%); }
+
+		.form-actions {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin-top: 19px;
+			padding-top: 16px;
+			border-top: 1px solid var(--line);
+		}
+
+		.button {
+			min-height: 40px;
+			padding: 0 15px;
+			border: 1px solid transparent;
+			border-radius: 4px;
+			cursor: pointer;
+			font-weight: 650;
+			transition: background-color .15s ease, transform .15s ease;
+		}
+
+		.button:active { transform: translateY(1px); }
+		.button-primary { color: var(--white); background: var(--green); }
+		.button-primary:hover { background: #245747; }
+		.button-secondary { color: #47564e; background: var(--white); border-color: var(--line); }
+		.button-secondary:hover { background: #f4f6f3; }
+
+		.table-tools {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.search-wrap { width: min(250px, 30vw); }
+		.search-wrap input { height: 36px; }
+
+		.table-scroll { overflow-x: auto; }
+		table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+		th {
+			padding: 11px 14px;
+			color: #64736b;
+			background: #f7f8f5;
+			border-bottom: 1px solid var(--line);
+			font-size: 10px;
+			font-weight: 700;
+			letter-spacing: .08em;
+			text-transform: uppercase;
+		}
+		td { padding: 13px 14px; border-bottom: 1px solid #edf0ec; }
+		tbody tr:last-child td { border-bottom: 0; }
+		tbody tr:hover { background: #fafbf8; }
+
+		.primary-cell { color: #20392f; font-weight: 650; }
+		.secondary-cell { margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+		.tag {
+			display: inline-flex;
+			align-items: center;
+			min-height: 23px;
+			padding: 2px 8px;
+			color: #375846;
+			background: var(--green-soft);
+			border-radius: 4px;
+			font-size: 11px;
+			font-weight: 650;
+		}
+
+		.delete-button {
+			padding: 6px 8px;
+			color: var(--red);
+			background: transparent;
+			border: 0;
+			border-radius: 3px;
+			cursor: pointer;
+			font-size: 12px;
+		}
+
+		.delete-button:hover { background: #fff0ed; }
+		.empty-state { padding: 32px 16px; color: var(--muted); text-align: center; }
+		.notice { min-height: 18px; margin: 11px 0 0; color: #426a54; font-size: 12px; }
+
+		@media (max-width: 980px) {
+			main { padding-right: 24px; padding-left: 24px; }
+			.workspace { grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 14px; }
+			.panel-heading { padding-right: 15px; padding-left: 15px; }
+			form { padding-right: 15px; padding-left: 15px; }
+			th, td { padding-right: 10px; padding-left: 10px; }
+		}
+
+		@media (max-width: 760px) {
+			.topbar { min-height: 62px; padding: 0 20px; }
+			.topbar-meta { display: none; }
+			main { padding: 26px 16px 40px; }
+			.page-heading { align-items: start; }
+			.count-badge { padding: 8px 10px; font-size: 12px; }
+			.workspace { grid-template-columns: 1fr; }
+			.form-panel { order: 0; }
+			.list-panel { order: 1; }
+		}
+
+		@media (max-width: 480px) {
+			.page-heading { flex-direction: column; }
+			.form-grid { grid-template-columns: 1fr; }
+			.field-wide { grid-column: auto; }
+			.panel-heading { align-items: flex-start; flex-direction: column; }
+			.table-tools, .search-wrap { width: 100%; }
+			.table-tools { justify-content: space-between; }
+			.search-wrap { flex: 1; }
+		}
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<div class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>RADIO / CONTROL</span></div>
+		<div class="topbar-meta">GESTIÓN DE EQUIPOS</div>
+	</header>
+
+	<main>
+		<section class="page-heading" aria-labelledby="page-title">
+			<div>
+				<p class="eyebrow">Inventario</p>
+				<h1 id="page-title">Radios</h1>
+				<p class="page-note">Registro y consulta de equipos asignados.</p>
+			</div>
+			<div class="count-badge"><span id="radio-count">0</span><span>equipos registrados</span></div>
+		</section>
+
+		<div class="workspace">
+			<section class="panel form-panel" aria-labelledby="form-title">
+				<div class="panel-heading">
+					<h2 id="form-title">Registrar radio</h2>
+					<span class="panel-kicker">Nuevo equipo</span>
+				</div>
+				<form id="radio-form">
+					<div class="generated-id"><span>ID de radio</span><strong>Automático al guardar</strong></div>
+					<div class="form-grid">
+						<div class="field">
+							<label for="id_programador">Programador</label>
+							<select id="id_programador" name="id_programador" required>
+								<option value="">Selecciona una persona</option>
+								<option value="1">Ana Lopez</option>
+								<option value="2">Carlos Ruiz</option>
+							</select>
+						</div>
+					
+
+						<div class="field">
+							<label for="num_tgr">Número TGR <span class="optional"></span></label>
+							<input id="num_tgr" name="num_tgr" maxlength="50" placeholder="Ej. COL123456">
+						</div>
+						<div class="field">
+							<label for="correo">Correo <span class="optional"></span></label>
+							<input id="correo" name="correo" type="email" maxlength="254" placeholder="nombre@empresa.com">
+						</div>
+						<div class="field field-wide">
+							<label for="nombre_puesto">Nombre del puesto <span class="optional"></span></label>
+							<input id="nombre_puesto" name="nombre_puesto" maxlength="100" placeholder="Ej. Supervisor de seguridad">
+						</div>
+						<div class="field">
+							<label for="id_empresa">Empresa</label>
+							<select id="id_empresa" name="id_empresa" required>
+								<option value="">Selecciona una empresa</option>
+								<option value="1">MML</option>
+								<option value="2">Minera Amari</option>
+                                <option value="3">Contratista</option>
+							</select>
+						</div>
+
+                        <div class="field">
+							<label for="id_tipo">Tipo de empleado</label>
+							<select id="id_tipo" name="id_tipo" required>
+								<option value="">Selecciona un tipo</option>
+								<option value="1">Staf</option>
+								<option value="2">No staff</option>
+							</select>
+						</div>
+
+
+
+						<div class="field">
+							<label for="id_area">Área</label>
+							<select id="id_area" name="id_area" required>
+								<option value="">Selecciona un área</option>
+								<option value="1">Operaciones</option>
+								<option value="2">Seguridad</option>
+							</select>
+						</div>
+						<div class="field field-wide">
+							<label for="id_modelo">Modelo de radio</label>
+							<select id="id_modelo" name="id_modelo" required>
+								<option value="">Selecciona un modelo</option>
+								<option value="1">XPR 3500e</option>
+								<option value="2">DEP 450</option>
+							</select>
+						</div>
+						<div class="field">
+							<label for="serie">Serie <span class="optional"></span></label>
+							<input id="serie" name="serie" maxlength="100" placeholder="Número de serie">
+						</div>
+						<div class="field">
+							<label for="fecha">Fecha <span class="optional"></span></label>
+							<input id="fecha" name="fecha" type="date">
+						</div>
+					</div>
+					<div class="form-actions">
+						<button class="button button-primary" type="submit">Guardar radio</button>
+						<button class="button button-secondary" type="reset">Limpiar</button>
+					</div>
+					<p class="notice" id="form-notice" role="status" aria-live="polite"></p>
+				</form>
+			</section>
+
+			<section class="panel list-panel" aria-labelledby="list-title">
+				<div class="panel-heading">
+					<h2 id="list-title">Radios registradas</h2>
+					<div class="table-tools">
+						<span class="panel-kicker" id="visible-count">2 registros</span>
+						<label class="search-wrap">
+							<span class="visually-hidden" hidden>Buscar radios</span>
+							<input id="search" type="search" placeholder="Buscar por serie, TGR o persona" aria-label="Buscar radios">
+						</label>
+					</div>
+				</div>
+				<div class="table-scroll">
+					<table>
+						<thead>
+							<tr>
+								<th>ID / TGR</th>
+								<th>Radio</th>
+								<th>Asignación</th>
+								<th>Área / empresa</th>
+								<th>Fecha</th>
+								<th><span class="visually-hidden" hidden>Acciones</span></th>
+							</tr>
+						</thead>
+						<tbody id="radio-rows"></tbody>
+					</table>
+					<div class="empty-state" id="empty-state" hidden>No se encontraron radios.</div>
+				</div>
+			</section>
+		</div>
+	</main>
+
+	<script>
+		const storageKey = "radio-inventory-records";
+		const references = {
+			id_programador: { 1: "Ana Lopez", 2: "Carlos Ruiz" },
+			id_tipo: { 1: "Planta", 2: "Contratista" },
+			id_empresa: { 1: "Empresa Ejemplo", 2: "Servicios Ejemplo" },
+			id_area: { 1: "Operaciones", 2: "Seguridad" },
+			id_modelo: { 1: "XPR 3500e", 2: "DEP 450" }
+		};
+
+		const sampleRecords = [
+			{ id_radio: 1, id_programador: "1", id_tipo: "1", num_tgr: "TGR-001", correo: "ana@example.com", nombre_puesto: "Tecnica de radio", id_empresa: "1", id_area: "1", id_modelo: "1", serie: "SER-10001", fecha: "2026-01-15" },
+			{ id_radio: 2, id_programador: "2", id_tipo: "2", num_tgr: "TGR-002", correo: "carlos@example.com", nombre_puesto: "Supervisor", id_empresa: "2", id_area: "2", id_modelo: "2", serie: "SER-10002", fecha: "2026-02-20" }
+		];
+
+		const form = document.querySelector("#radio-form");
+		const rows = document.querySelector("#radio-rows");
+		const search = document.querySelector("#search");
+		const notice = document.querySelector("#form-notice");
+		let radios;
+
+		try {
+			radios = JSON.parse(localStorage.getItem(storageKey)) || sampleRecords;
+		} catch {
+			radios = sampleRecords;
+		}
+
+		function addCell(row, text, className) {
+			const cell = document.createElement("td");
+			if (className) cell.className = className;
+			cell.textContent = text || "—";
+			row.append(cell);
+			return cell;
+		}
+
+		function render() {
+			const query = search.value.trim().toLocaleLowerCase("es");
+			const filtered = radios.filter((radio) => {
+				const searchable = [
+					radio.id_radio, radio.num_tgr, radio.serie, radio.correo, radio.nombre_puesto,
+					references.id_programador[radio.id_programador], references.id_modelo[radio.id_modelo]
+				].join(" ").toLocaleLowerCase("es");
+				return searchable.includes(query);
+			});
+
+			rows.replaceChildren();
+			for (const radio of filtered) {
+				const row = document.createElement("tr");
+				const identity = document.createElement("td");
+				const id = document.createElement("div");
+				id.className = "primary-cell";
+				id.textContent = `RAD-${String(radio.id_radio).padStart(4, "0")}`;
+				const tgr = document.createElement("div");
+				tgr.className = "secondary-cell";
+				tgr.textContent = radio.num_tgr || "Sin TGR";
+				identity.append(id, tgr);
+				row.append(identity);
+
+				const model = document.createElement("td");
+				const modelName = document.createElement("div");
+				modelName.className = "primary-cell";
+				modelName.textContent = references.id_modelo[radio.id_modelo] || "Modelo sin asignar";
+				const serial = document.createElement("div");
+				serial.className = "secondary-cell";
+				serial.textContent = radio.serie || "Sin número de serie";
+				model.append(modelName, serial);
+				row.append(model);
+
+				const assignment = document.createElement("td");
+				const person = document.createElement("div");
+				person.className = "primary-cell";
+				person.textContent = references.id_programador[radio.id_programador] || "Sin asignar";
+				const type = document.createElement("span");
+				type.className = "tag";
+				type.textContent = references.id_tipo[radio.id_tipo] || "Tipo desconocido";
+				assignment.append(person, type);
+				row.append(assignment);
+
+				addCell(row, `${references.id_area[radio.id_area] || "—"} · ${references.id_empresa[radio.id_empresa] || "—"}`);
+				addCell(row, radio.fecha || "—");
+
+				const action = document.createElement("td");
+				const remove = document.createElement("button");
+				remove.className = "delete-button";
+				remove.type = "button";
+				remove.textContent = "Eliminar";
+				remove.setAttribute("aria-label", `Eliminar radio RAD-${String(radio.id_radio).padStart(4, "0")}`);
+				remove.addEventListener("click", () => {
+					radios = radios.filter((item) => item.id_radio !== radio.id_radio);
+					persist();
+					render();
+					notice.textContent = "Radio eliminada de esta lista local.";
+				});
+				action.append(remove);
+				row.append(action);
+				rows.append(row);
+			}
+
+			document.querySelector("#radio-count").textContent = radios.length;
+			document.querySelector("#visible-count").textContent = `${filtered.length} ${filtered.length === 1 ? "registro" : "registros"}`;
+			document.querySelector("#empty-state").hidden = filtered.length > 0;
+		}
+
+		function persist() {
+			try {
+				localStorage.setItem(storageKey, JSON.stringify(radios));
+			} catch {
+				notice.textContent = "No se pudo guardar en este navegador.";
+			}
+		}
+
+		form.addEventListener("submit", (event) => {
+			event.preventDefault();
+			const values = Object.fromEntries(new FormData(form));
+			const nextId = Math.max(0, ...radios.map((radio) => Number(radio.id_radio))) + 1;
+			radios.unshift({ ...values, id_radio: nextId });
+			persist();
+			form.reset();
+			notice.textContent = `Radio RAD-${String(nextId).padStart(4, "0")} guardada en esta lista local.`;
+			render();
+		});
+
+		form.addEventListener("reset", () => {
+			notice.textContent = "";
+		});
+		search.addEventListener("input", render);
+		render();
+	</script>
+</body>
+</html>
